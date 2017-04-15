@@ -1,0 +1,15 @@
+1.) first we need to install SystemTap. SystemTap is a scripting language/tool that allows for dynamic instrumenting(monitoring) of running production Linux Based kernels.
+2.) This shows the installation of kernel debugging info to the system this is required by systemTap in order to monitor the system.
+3.) We create a file called "update.stp"
+4.) First, the script places a probe at the beginning of the kernel function “mem_write” when called and not loaded inline:
+probe kernel.function("mem_write").call ? {
+        $count = 0
+}
+Next, the script places a probe at the ptrace syscalls that disables them (this bit can impair antivirus software and potentially other kinds of software such as debuggers):
+
+probe syscall.ptrace {  // includes compat ptrace as well
+        $request = 0xfff
+}
+Finally, the “probe begin” and “probe end” code blocks tell systemtap to add the supplied text to the kernel log buffer via the printk function. This creates an audit trail by registering in the system logs exactly when the mitigation is loaded and unloaded.
+5.) run the script
+6.....) all other steps are to set up the exploit
